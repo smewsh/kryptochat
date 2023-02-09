@@ -1,0 +1,168 @@
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='jsbn.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='jsbn2.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='prng4.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='rng.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='ec.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='sec.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='diffiehellman.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='sha256.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='aes.js')}}"></script>
+
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for msg in messages %}
+    <br>
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        {{msg}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+<br>
+Hi, {{user}}, send a message to {{friend}}!
+
+<!-- Button trigger modal -->
+<br>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+    Compose message
+  </button>
+
+  <br>
+  <br>
+
+  <input type="hidden" id="pubkeyX" name="pubkey" value="{{friend_pk["X"]}}">
+  <input type="hidden" id="pubkeyY" name="pubkey" value="{{friend_pk["Y"]}}">
+  <input type="hidden" id="username" name="username" value="{{user}}">
+
+  <script>
+    var pubKeyX = document.getElementById("pubkeyX").value
+    var pubKeyY = document.getElementById("pubkeyY").value
+    var username = document.getElementById("username").value
+    var privateKey = localStorage.getItem(username+"privateKey")
+    var secret = generate_secret(privateKey,pubKeyX,pubKeyY)
+    var key = sha256(secret["X"]+secret["Y"])
+
+
+
+    function encrypt() {
+      var plaintext = document.getElementById("messageTextarea").value
+      var ciphertext = CryptoJS.AES.encrypt(plaintext,key)
+      document.getElementById("messageTextarea").value = ciphertext
+    }
+
+    function decrypt(elementName) {
+      console.log(elementName)
+      var ciphertext = document.getElementById(elementName).value
+      console.log(ciphertext)
+      var plaintext = CryptoJS.AES.decrypt(ciphertext,key).toString(CryptoJS.enc.Utf8)
+      console.log(plaintext)
+      document.getElementById(elementName).value = plaintext
+    }
+
+  </script>
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Message {{friend}}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form action="#" method="post">
+            <div class="form-group">
+                <textarea class="form-control" id="messageTextarea" name="sendMessage" rows="3"></textarea>
+              </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" onclick="encrypt()" class="btn btn-outline-primary">Encrypt</button>
+          <button type="submit" class="btn btn-primary">Send</button>
+        </div>
+    </form>
+      </div>
+    </div>
+  </div>
+
+
+
+<div class="row">
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Sent:</h5>
+          {% for item in sent %}
+          <li class="list-group-item">
+              {{item["time"]}}
+              <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#sentModal{{loop.index}}">
+                  View Message
+                </button>
+                
+                <!-- Send Message Modal -->
+                <div class="modal fade" id="sentModal{{loop.index}}" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Message to {{friend}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <textarea readonly class="form-control" id="sentMsg{{loop.index}}">{{item["message"]}}</textarea>
+                      </div>
+                    <div class="modal-footer">
+                      <button type="button" onclick="decrypt('sentMsg'+{{loop.index}}); this.disabled=true" class="btn btn-outline-primary">Decrypt</button>
+                    </div>
+                  </div>
+                </div>
+          </li>
+      {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Received:</h5>
+            {% for item in received %}
+                <li class="list-group-item">
+                    {{item["time"]}}
+                    <button type="button" class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#receivedModal{{loop.index}}">
+                        View Message
+                      </button>
+                      
+                      <!-- Send Message Modal -->
+                      <div class="modal fade" id="receivedModal{{loop.index}}" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">Message from {{friend}}</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <textarea readonly class="form-control" id="recvMsg{{loop.index}}">{{item["message"]}}</textarea>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" onclick="decrypt('recvMsg'+{{loop.index}}); this.disabled=true" class="btn btn-outline-primary">Decrypt</button>
+                          </div>
+                        </div>
+                      </div>
+                </li>
+            {% endfor %}    
+        </div>
+      </div>
+    </div>
+    
+  </div>
+{% endblock %}

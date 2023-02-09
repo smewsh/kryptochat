@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for msg in messages %}
+    <br>
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        {{msg}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+<div class="mx-auto" style="width: 50%;">
+      <br>
+      <div class="mx-auto" style="width: 50%;">
+        
+    </div>
+    </ul>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Friends ({{db["friends"]|length}})<a style="font-size:x-small;" href="/user">   Refresh</a></h5>
+            
+            <p>Select a friend to message</p>
+
+
+            {% for item in db["friends"] %}
+              <li class="list-group-item" href="message/{{item}}">
+                <a href="/message/{{item}}">{{item}}</a>
+                <a type="button" class="btn btn-secondary float-right btn-sm" href="/friend/{{item}}/delete" role="button">Delete</a>
+              </li>
+            {% endfor %}
+
+
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Friend Requests ({{db["friend-requests"]|length}})<a style="font-size:x-small;" href="/user">   Refresh</a></h5>
+            {% for item in db["friend-requests"] %}
+              <li class="list-group-item">
+                {{item["user"]}}
+                {% if item["sent"] %}
+                <button type="button" class="btn btn-secondary float-right btn-sm" disabled>Request Sent</button>
+                {% else %}
+                <a type="button" class="btn btn-primary float-right btn-sm" href="/friendrequest/{{item["user"]}}/accept" role="button">Accept</a>
+                <a type="button" class="btn btn-secondary float-right btn-sm" href="/friendrequest/{{item["user"]}}/decline" role="button">Decline</a>
+                {% endif %}
+              </li>
+            {% endfor %}
+            <form action="#" method="post">
+              <div class="form-group">
+                <br>
+                <label for="exampleInputPassword1">Send Friend Request</label>
+                <input class="form-control" id="inputFriendReq" placeholder="Username" name="friend-req">
+                <button type="submit" class="btn btn-primary btn-sm">Send</button>
+            </div>
+            </form>
+            
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+{% endblock %}

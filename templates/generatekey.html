@@ -1,0 +1,97 @@
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='jsbn.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='jsbn2.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='prng4.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='rng.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='ec.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='sec.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='diffiehellman.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='sha256.js')}}"></script>
+<script language="JavaScript" type="text/javascript" src="{{url_for('static', filename='aes.js')}}"></script>
+
+<script>
+    function generateKeys() {
+        var privateKey = generate_priv();
+        var publicKey = derive_pub(privateKey);
+        var username = document.getElementById("username").value
+
+
+        localStorage.setItem(username+'privateKey', privateKey)
+
+        document.getElementById("privateKey").value = privateKey;
+        document.getElementById("publicKeyX").value = publicKey["X"];
+        document.getElementById("publicKeyY").value = publicKey["Y"];
+
+        document.getElementById("submit").className = "btn btn-primary"
+        document.getElementById("submit").type = "submit"
+        document.getElementById("generateButton").className = "btn btn-secondary disabled"
+        document.getElementById("generateButton").onclick = ""
+    }
+</script>
+
+<input type="hidden" id="username" name="username" value="{{user}}">
+
+{% extends "base.html" %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for msg in messages %}
+    <br>
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        {{msg}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+<br>
+<div class="mx-auto" style="width:50%;">
+    <h3>Key Generator</h3>
+    Use this tool to generate keys for message encryption. 
+    <br>
+    <br>
+    If you are a new user, simply press "generate keys", followed by "submit public key". If you wish to use this service on multiple machines, please keep note of the private key!
+    <br>
+    <br>
+    If you would like to set new public keys on the server, please simply enter your corresponding private key and press submit (TBD)
+    <br>
+    <br>
+    If you are on a new machine, and have lost your key, you can create a new key, however, you will be unable to decrypt previous chat messages!
+    <br>
+    <br>
+    Please note that no private keys are sent to the server to ensure E2E (end-to-end) encryption! Only your public key is sent, while your private key is stored locally.
+    <br>
+    <br>
+        <div class="card">
+            <button type="button" id="generateButton" onclick="generateKeys()" class="btn btn-outline-primary">Generate Keys</button>
+        </div>
+
+
+
+            <div class="card">
+                <div class="card-body">
+                    <h4>Private key</h4>
+                    <input readonly class="form-control" id="privateKey" rows="3"></input>
+                </div>
+            </div>
+            <form action="#" method="post">
+            <div class="card">
+                <div class="card-body">
+                    <h4>Public key</h4>
+                    <input readonly class="form-control" id="publicKeyX" name="pubX" rows="3"></input>
+                    <input readonly class="form-control" id="publicKeyY" name="pubY" rows="3"></input>
+                    
+                </div>
+            </div>
+
+            <div class="card">
+                <button type="button" id="submit" class="btn btn-primary disabled" aria-disabled="true">Submit public key</button>
+            </div>
+            </form> 
+
+
+</div>
+
+{% endblock %}
