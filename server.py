@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
-app.secret_key = "WziLNrfRES7L+964Q3vDnIhkqWgKxf9PFjBm1iwiiu1ZWH9lScgPdy7oyGZkcx4668sV/lkQd4YFg8JX/Pn9Fg=="
+app.secret_key = "secretkeyteehee"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.sqlite3'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
